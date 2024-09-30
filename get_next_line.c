@@ -1,70 +1,112 @@
 #include "get_next_line.h"
 
-char *read_fd(fd)
+char *read_fd(int fd, ssize_t *n_bytes)
 {
 	char buf[BUFFER_SIZE + 1];
-	ssize_t n_bytes;
-	
-	n_bytes = read(fd, buf, BUFFER_SIZE);
-	if (n_bytes < 1)
-		return (NULL);
+	char *buffer;
 
-	return (buf);
+	*buf = 0;
+	buffer = NULL;
+	*n_bytes = read(fd, buf, BUFFER_SIZE);
+	buf[*n_bytes] = '\0';
+	if (*n_bytes < 1)
+		return (NULL);
+	else	
+		buffer = ft_strdup(buf);
+	return (buffer);
 }
 
-char *fill_static(char *buf, int fd)
+char *fill_static(int fd, char **stocked, ssize_t *n_bytes)
 {
-	static char *stocked;
-
-	if (!stocked)
-		stocked = ft_strdup(buf);
-	if(!stocked)
+	char *line;
+	char *aux;
+	char *buf;
+	
+	line = NULL;
+	aux = NULL;
+	buf = NULL;
+	if(!*stocked)
 		return (NULL);
-	while (!line)
+	while(!(ft_strchr(*stocked, '\n') || (*n_bytes = 0)))
 	{
-		line = looking_for_line(stocked);
-		if(!line)
-		{
-			buf = read_fd(fd);
-			aux = ft_strjoin(buf, stocked);
-			stocked = ft_strdup(aux);
-			free(aux);
-		}
+			buf = read_fd(fd, n_bytes);
+			if(!buf)
+				break;
+			aux = ft_strjoin(*stocked, buf);
+			if(!aux)
+			{
+				free(*stocked);
+				free(buf);
+				return (NULL);
+			}
+			free(*stocked);
+			*stocked = aux;
+			free(buf);
 	}
+	if(!line)	
+		line = looking_for_line(stocked);
 	return(line);
 
 }
 
-char *looking_for_line(static char *stocked)
+char *looking_for_line(char **stocked)
 {
 	char *position;
 	char *line;
 	int end_stk;
+	char *aux;
 	
 	line = NULL;
-	position = ft_strchr(stocked, '\n');
-	end_stk = ft_strlen(stocked);
-	if(!position)
-		ft_strchr(stocked, '\0');
+	position = NULL;
+	end_stk = ft_strlen(*stocked);
+	while(!position)
+	{
+		if(ft_strchr(*stocked, '\n'))
+		{	
+			position = ft_strchr(*stocked, '\n');
+			break;
+		}
+		if(ft_strchr(*stocked, '\0'))
+			position = ft_strchr(*stocked, '\0');
+	}	
 	if(position)
 	{
-		line	= ft_substr(stocked, 0, position - stocked);
-		stocked = ft_substr(stocked, position - stocked, end_stk);
+		line	= ft_substr(*stocked, 0, (position - *stocked + 1));
+		if(!line)
+			return (NULL);
+		aux = ft_substr(*stocked, (position - *stocked + 1), end_stk);
+		if(!aux)
+			free(aux);
+		free(*stocked);
+		*stocked = aux;
 	}
-
 	return(line);
 }
 
 char *get_next_line(int fd)
 {
-	if (!fd || fd < 0 || BUFFER_SIZE < 1)
+	char *line;
+	static char *stocked = NULL;
+	ssize_t n_bytes;
+	
+	line = NULL;
+	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);
-	buf = read_fd(fd);
-	if (!buf)
+	if(!stocked || stocked[0] == '\0')
+		stocked = read_fd(fd, &n_bytes);
+	if (stocked && stocked[0] == '\0')
+	{
+		free(stocked);
+		stocked = NULL;
 		return(NULL);
-	line = fill_static(buf, fd);
+	}
+	line = fill_static(fd, &stocked, &n_bytes);
 	if(!line)
+	{
+		free(stocked);
+		stocked = NULL;
 		return(NULL);
+	}
 	return(line);
 
 }
