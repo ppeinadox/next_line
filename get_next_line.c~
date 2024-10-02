@@ -44,7 +44,7 @@ char *fill_static(int fd, char **stocked, ssize_t *n_bytes)
 			*stocked = aux;
 			free(buf);
 	}
-	if(!line)
+	if(!line)	
 		line = looking_for_line(stocked, n_bytes);
 	return(line);
 
@@ -60,7 +60,6 @@ char *looking_for_line(char **stocked, ssize_t *n_bytes)
 	line = NULL;
 	position = NULL;
 	end_stk = ft_strlen(*stocked);
-	aux = NULL;
 	while(!position)
 	{
 		if(ft_strchr(*stocked, '\n'))
@@ -75,11 +74,7 @@ char *looking_for_line(char **stocked, ssize_t *n_bytes)
 	{
 		line = ft_substr(*stocked, 0, (position - *stocked + 1));
 		if(!line)
-		{
-			free(*stocked);
-			*stocked = NULL;
 			return (NULL);
-		}
 		if(*n_bytes == 0)
 		{	
 			free(*stocked);
@@ -99,14 +94,14 @@ char *get_next_line(int fd)
 {
 	char *line;
 	static char *stocked = NULL;
-	ssize_t n_bytes = 1;
+	ssize_t n_bytes;
 	
 	line = NULL;
 	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);
 	if(!stocked || stocked[0] == '\0')
 	{	
-		free (stocked);
+		n_bytes = 0;
 		stocked = read_fd(fd, &n_bytes);
 	}
 	if (stocked && stocked[0] == '\0')
