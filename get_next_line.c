@@ -1,4 +1,5 @@
 #include "get_next_line.h"
+#include <stdio.h>
 
 char *read_fd(int fd, ssize_t *n_bytes)
 {
@@ -99,7 +100,10 @@ char *get_next_line(int fd)
 	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);
 	if(!stocked || stocked[0] == '\0')
+	{	
+		n_bytes = 0;
 		stocked = read_fd(fd, &n_bytes);
+	}
 	if (stocked && stocked[0] == '\0')
 	{
 		free(stocked);

@@ -6,7 +6,7 @@ int main(void)
 	int i;
 	int fd;
 	
-	i = 4;
+	i = 6;
 	fd = open("/Users/patricia/ppatroclo/get_next_line/41_with_nl.txt", O_RDONLY);
 	while (i >= 0)
 	{
