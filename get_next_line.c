@@ -44,12 +44,12 @@ char *fill_static(int fd, char **stocked, ssize_t *n_bytes)
 			free(buf);
 	}
 	if(!line)	
-		line = looking_for_line(stocked);
+		line = looking_for_line(stocked, n_bytes);
 	return(line);
 
 }
 
-char *looking_for_line(char **stocked)
+char *looking_for_line(char **stocked, ssize_t *n_bytes)
 {
 	char *position;
 	char *line;
@@ -71,14 +71,20 @@ char *looking_for_line(char **stocked)
 	}	
 	if(position)
 	{
-		line	= ft_substr(*stocked, 0, (position - *stocked + 1));
+		line = ft_substr(*stocked, 0, (position - *stocked + 1));
 		if(!line)
 			return (NULL);
-		aux = ft_substr(*stocked, (position - *stocked + 1), end_stk);
-		if(!aux)
-			free(aux);
-		free(*stocked);
-		*stocked = aux;
+		if(*n_bytes == 0)
+		{	
+			free(*stocked);
+			*stocked = NULL;
+		}
+		else
+		{
+			aux = ft_substr(*stocked, (position - *stocked + 1), end_stk);	
+			free(*stocked);
+			*stocked = aux;
+		}
 	}
 	return(line);
 }
@@ -108,5 +114,4 @@ char *get_next_line(int fd)
 		return(NULL);
 	}
 	return(line);
-
 }
