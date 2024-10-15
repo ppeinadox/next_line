@@ -16,6 +16,7 @@ char    *ft_substr(char const *s, unsigned int start, size_t len);
 char	*ft_strjoin(char const *s1, char const *s2);
 char *read_fd(int fd, ssize_t *n_bytes);
 char *fill_static(int fd, char **stocked, ssize_t *n_bytes);
+char    *looking_for_position(char **stocked);
 char *looking_for_line(char **stocked, ssize_t *n_bytes);
 char *get_next_line(int fd);
 

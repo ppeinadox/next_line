@@ -35,11 +35,7 @@ char *fill_static(int fd, char **stocked, ssize_t *n_bytes)
 				break;
 			aux = ft_strjoin(*stocked, buf);
 			if(!aux)
-			{
-				free(*stocked);
-				free(buf);
-				return (NULL);
-			}
+				return (free(*stocked), free(buf), NULL);
 			free(*stocked);
 			*stocked = aux;
 			free(buf);
@@ -50,7 +46,19 @@ char *fill_static(int fd, char **stocked, ssize_t *n_bytes)
 
 }
 
-char *looking_for_line(char **stocked, ssize_t *n_bytes)
+char	*looking_for_position(char **stocked)
+{
+	char *position;
+
+	position = NULL;	
+	if (ft_strchr(*stocked, '\n'))
+		position = ft_strchr(*stocked, '\n');
+	else if (ft_strchr(*stocked, '\0'))
+		position = ft_strchr(*stocked, '\0');
+	return (position);
+}
+
+char	*looking_for_line(char **stocked, ssize_t *n_bytes)
 {
 	char *position;
 	char *line;
@@ -58,41 +66,24 @@ char *looking_for_line(char **stocked, ssize_t *n_bytes)
 	char *aux;
 	
 	line = NULL;
-	position = NULL;
 	end_stk = ft_strlen(*stocked);
 	aux = NULL;
-	while(!position)
-	{
-		if(ft_strchr(*stocked, '\n'))
-		{	
-			position = ft_strchr(*stocked, '\n');
-			break;
-		}
-		if(ft_strchr(*stocked, '\0'))
-			position = ft_strchr(*stocked, '\0');
-	}	
-	if(position)
-	{
-		line = ft_substr(*stocked, 0, (position - *stocked + 1));
-		if(!line)
-		{
-			free(*stocked);
-			*stocked = NULL;
-			return (NULL);
-		}
-		if(*n_bytes == 0)
-		{	
-			free(*stocked);
-			*stocked = NULL;
-		}
-		else
-		{
-			aux = ft_substr(*stocked, (position - *stocked + 1), end_stk);	
-			free(*stocked);
-			*stocked = aux;
-		}
+	position = looking_for_position(stocked);
+	line = ft_substr(*stocked, 0, (position - *stocked + 1));
+	if(!line)
+		return (free(*stocked), NULL);
+	if(*n_bytes == 0)
+	{	
+		free(*stocked);
+		*stocked = NULL;
 	}
-	return(line);
+	else
+	{
+		aux = ft_substr(*stocked, (position - *stocked + 1), end_stk);	
+		free(*stocked);
+		*stocked = aux;
+	}
+	return (line);
 }
 
 char *get_next_line(int fd)
@@ -110,17 +101,9 @@ char *get_next_line(int fd)
 		stocked = read_fd(fd, &n_bytes);
 	}
 	if (stocked && stocked[0] == '\0')
-	{
-		free(stocked);
-		stocked = NULL;
-		return(NULL);
-	}
+		return (free(stocked), NULL);
 	line = fill_static(fd, &stocked, &n_bytes);
 	if(!line)
-	{
-		free(stocked);
-		stocked = NULL;
-		return(NULL);
-	}
+		return (free(stocked), NULL);
 	return(line);
 }
